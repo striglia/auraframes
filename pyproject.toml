@@ -80,3 +80,12 @@ addopts = "-v --tb=short"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "moto>=5.1.19",
+    "pre-commit>=4.5.1",
+    "pytest>=9.0.2",
+    "pytest-httpx>=0.36.0",
+    "ruff>=0.14.10",
+]

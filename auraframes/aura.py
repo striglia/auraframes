@@ -1,9 +1,9 @@
-import sys
 import os
+import sys
 import time
 
-from PIL import Image
 from loguru import logger
+from PIL import Image
 from tqdm import tqdm
 
 from auraframes.api.accountApi import AccountApi
@@ -21,7 +21,6 @@ from auraframes.utils.io import build_path, write_model
 
 
 class Aura:
-
     def __init__(self):
         self._init_logger()
         self._client = Client()
@@ -33,7 +32,11 @@ class Aura:
         self.asset_api = AssetApi(self._client)
         self.exif_writer = ExifWriter()
 
-    def login(self, email: str = os.getenv('AURA_EMAIL'), password: str = os.getenv('AURA_PASSWORD')):
+    def login(
+        self,
+        email: str = os.getenv("AURA_EMAIL"),
+        password: str = os.getenv("AURA_PASSWORD"),
+    ):
         """
 
         :param email: The email of the account to authenticate with, defaults to ENVIRON['AURA_EMAIL']
@@ -42,10 +45,9 @@ class Aura:
         """
         user = self.account_api.login(email, password)
 
-        self._client.add_default_headers({
-            'x-token-auth': user.auth_token,
-            'x-user-id': user.id
-        })
+        self._client.add_default_headers(
+            {"x-token-auth": user.auth_token, "x-user-id": user.id}
+        )
 
         return self
 
@@ -56,37 +58,47 @@ class Aura:
         paginated_assets, cursor = self.frame_api.get_assets(frame_id)
         assets = paginated_assets
         while cursor:
-            paginated_assets, cursor = self.frame_api.get_assets(frame_id, cursor=cursor)
+            paginated_assets, cursor = self.frame_api.get_assets(
+                frame_id, cursor=cursor
+            )
             time.sleep(1)  # TODO: Make better (tm)
             assets.extend(paginated_assets)
 
         return assets
 
-    def dump_frame(self, frame_id: str, path: str, download_images: bool = True, download_activities: bool = True):
+    def dump_frame(
+        self,
+        frame_id: str,
+        path: str,
+        download_images: bool = True,
+        download_activities: bool = True,
+    ):
         frame, _ = self.frame_api.get_frame(frame_id)
-        frame_dir = build_path(path, f'{frame.name}-{frame.id}/')
+        frame_dir = build_path(path, f"{frame.name}-{frame.id}/")
 
-        write_model(frame, build_path(frame_dir, 'frame.json'))
+        write_model(frame, build_path(frame_dir, "frame.json"))
 
         if download_activities:
             activities = self.frame_api.get_activities(frame.id)
-            write_model(activities, build_path(frame_dir, 'activities.json'))
+            write_model(activities, build_path(frame_dir, "activities.json"))
 
         assets = self.get_all_assets(frame_id)
-        write_model(assets, build_path(frame_dir, 'assets.json'))
+        write_model(assets, build_path(frame_dir, "assets.json"))
 
         if download_images:
-            self.download_images_from_assets(assets, build_path(frame_dir, f'asset_images/'))
+            self.download_images_from_assets(
+                assets, build_path(frame_dir, "asset_images/")
+            )
 
     def download_images_from_assets(self, assets: list[Asset], base_path: str):
         failed_to_retrieve = []
         for asset in tqdm(assets):
             try:
                 get_image_from_asset(asset, base_path, self.exif_writer)
-            except Exception as e:
+            except Exception:
                 failed_to_retrieve.append(asset)
         if len(failed_to_retrieve) > 0:
-            logger.debug(f'Failed to retrieve {len(failed_to_retrieve)} assets.')
+            logger.debug(f"Failed to retrieve {len(failed_to_retrieve)} assets.")
 
     def clone(self, source_frame, target_frame):
         # TODO: Read assets from one frame and immediately clones them to another (in memory)
@@ -105,13 +117,17 @@ class Aura:
             logger.error(e)
             return
         local_identifier = asset.local_identifier
-        self.frame_api.select_asset(frame_id, AssetPartialId(local_identifier=local_identifier))
+        self.frame_api.select_asset(
+            frame_id, AssetPartialId(local_identifier=local_identifier)
+        )
         queue_url = self.get_sqs()
         self.sqsClient.receive_message(queue_url, wait_time_seconds=5)
-        self.frame_api.select_asset(frame_id, AssetPartialId(local_identifier=local_identifier))
+        self.frame_api.select_asset(
+            frame_id, AssetPartialId(local_identifier=local_identifier)
+        )
         client = S3Client()
-        filename, md5 = client.upload_file(
-            open(image_path, 'rb').read(), '.jpg')
+        with open(image_path, "rb") as f:
+            filename, md5 = client.upload_file(f.read(), ".jpg")
 
         asset.file_name = filename
         asset.md5_hash = md5
@@ -125,13 +141,17 @@ class Aura:
     def get_sqs(self):
         self.sqsClient = SQSClient()
         # TODO: Is this a hardcoded queue URL?
-        queueUrl = self.sqsClient.get_queue_url('4ab446b4-33a7-4a76-881d-d545d153ab5a')
+        queueUrl = self.sqsClient.get_queue_url("4ab446b4-33a7-4a76-881d-d545d153ab5a")
         return queueUrl
 
     def _init_logger(self):
         # logger.remove()  # remove / set this to debug if needed
-        logger.add(sys.stderr, level="INFO", format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-                                                    "<level>{level: <8}</level> | "
-                                                    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
-                                                    "<level>{message}</level> Context: {extra}")
-        logger.add('logs/file_{time}.log')
+        logger.add(
+            sys.stderr,
+            level="INFO",
+            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+            "<level>{message}</level> Context: {extra}",
+        )
+        logger.add("logs/file_{time}.log")
