@@ -46,6 +46,11 @@ dev = [
     { name = "types-tqdm" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.26.38" },
@@ -69,6 +74,9 @@ requires-dist = [
     { name = "types-tqdm", marker = "extra == 'dev'" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "mypy", specifier = ">=1.19.1" }]
 
 [[package]]
 name = "boto3"
