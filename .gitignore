@@ -1,5 +1,8 @@
 .idea/
 flow/
+
+# Claude Code temporary plans (session artifacts, not permanent docs)
+.claude/plans/
 images/
 mitmproxy/
 images/
