@@ -22,7 +22,6 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
-    { name = "botocore" },
     { name = "geopy" },
     { name = "h2" },
     { name = "httpx" },
@@ -51,7 +50,6 @@ dev = [
 requires-dist = [
     { name = "boto3", specifier = ">=1.26.38" },
     { name = "boto3-stubs", extras = ["s3", "sqs", "cognito-identity"], marker = "extra == 'dev'" },
-    { name = "botocore", specifier = ">=1.29.38" },
     { name = "geopy", specifier = ">=2.3.0" },
     { name = "h2", specifier = ">=4.1.0" },
     { name = "httpx", specifier = ">=0.23.1" },
