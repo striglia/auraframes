@@ -1,6 +1,6 @@
 from auraframes.aura import Aura
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     aura = Aura()
     aura.login()
     aura.frame_api.get_frames()

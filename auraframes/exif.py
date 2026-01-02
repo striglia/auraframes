@@ -1,18 +1,16 @@
-from datetime import datetime
-from geopy import Nominatim
 import io
+from fractions import Fraction
+
 import piexif
 import piexif.helper
-from fractions import Fraction
-import json
-import time
+from geopy import Nominatim
 from loguru import logger
 
 from auraframes.models.asset import Asset
 
-
 # Most of the exif writing is from:
 # https://gitlab.com/searchwing/development/payloads/ros-generic/-/blob/master/searchwing_common_py/scripts/ImageSaverNode.py
+
 
 def build_gps_ifd(location_dms: tuple[any, any]):
     if not location_dms:
@@ -26,7 +24,7 @@ def build_gps_ifd(location_dms: tuple[any, any]):
         piexif.GPSIFD.GPSLongitude: location_dms[1][:-1],
         piexif.GPSIFD.GPSAltitudeRef: 0,
         piexif.GPSIFD.GPSAltitude: (0, 1),
-        piexif.GPSIFD.GPSStatus: b'A'
+        piexif.GPSIFD.GPSStatus: b"A",
     }
 
 
@@ -42,54 +40,58 @@ class ExifWriter:
 
         try:
             location = self.geolocator.geocode(location_name)
-        except:
-            logger.info(f'Failed to read GPS data for {location_name}')
+        except Exception:
+            logger.info(f"Failed to read GPS data for {location_name}")
             return None
 
         if not location:
             return None
 
-        longitude_dms = convert_to_rational_dms(to_deg(location.longitude, is_longitude=True))
-        latitude_dms = convert_to_rational_dms(to_deg(location.latitude, is_longitude=False))
+        longitude_dms = convert_to_rational_dms(
+            to_deg(location.longitude, is_longitude=True)
+        )
+        latitude_dms = convert_to_rational_dms(
+            to_deg(location.latitude, is_longitude=False)
+        )
 
         self.cache[location_name] = (longitude_dms, latitude_dms)
         return longitude_dms, latitude_dms
 
     def write_exif(self, image, asset: Asset, thumbnail=None, set_gps_ifd=True):
-        taken_datetime = asset.taken_at_dt.strftime('%Y:%m:%d %H:%M:%S').encode()
+        taken_datetime = asset.taken_at_dt.strftime("%Y:%m:%d %H:%M:%S").encode()
 
         exif_dict = {
             "Exif": {
                 piexif.ExifIFD.DateTimeOriginal: taken_datetime,
                 piexif.ExifIFD.DateTimeDigitized: taken_datetime,
-                piexif.ExifIFD.OffsetTime: b'-05:00',
-                piexif.ExifIFD.OffsetTimeOriginal: b'-05:00',
-
+                piexif.ExifIFD.OffsetTime: b"-05:00",
+                piexif.ExifIFD.OffsetTimeOriginal: b"-05:00",
             },
-            '0th': {
+            "0th": {
                 piexif.ImageIFD.DateTime: taken_datetime,
-                piexif.ImageIFD.Artist: asset.user.name if asset.user else None
-            }
+                piexif.ImageIFD.Artist: asset.user.name if asset.user else None,
+            },
         }
 
         if set_gps_ifd:
             location_dms = self._lookup_gps(asset.location_name)
-            exif_dict['GPS'] = build_gps_ifd(location_dms)
+            exif_dict["GPS"] = build_gps_ifd(location_dms)
 
         if thumbnail:
-            exif_dict['thumbnail'] = thumbnail
-            exif_dict['1st'] = {piexif.ImageIFD.Make: u"Canon",
-                                piexif.ImageIFD.XResolution: (40, 1),
-                                piexif.ImageIFD.YResolution: (40, 1),
-                                piexif.ImageIFD.Software: u"piexif"
-                                }
+            exif_dict["thumbnail"] = thumbnail
+            exif_dict["1st"] = {
+                piexif.ImageIFD.Make: "Canon",
+                piexif.ImageIFD.XResolution: (40, 1),
+                piexif.ImageIFD.YResolution: (40, 1),
+                piexif.ImageIFD.Software: "piexif",
+            }
         new_imag = io.BytesIO()
         exif_bytes = piexif.dump(exif_dict)
 
         try:
             piexif.insert(exif_bytes, image, new_imag)
-        except:
-            logger.info(f'Failed to write to image.')
+        except Exception:
+            logger.info("Failed to write to image.")
         return new_imag
 
 
@@ -99,7 +101,12 @@ def change_to_rational(number):
 
 
 def convert_to_rational_dms(dms: tuple[int, int, float, str]):
-    return change_to_rational(dms[0]), change_to_rational(dms[1]), change_to_rational(dms[2]), dms[3]
+    return (
+        change_to_rational(dms[0]),
+        change_to_rational(dms[1]),
+        change_to_rational(dms[2]),
+        dms[3],
+    )
 
 
 def clone_exif(original_path, clone_path):
@@ -114,11 +121,12 @@ def get_readable_exif(image_path):
         if not exif_dict[ifd]:
             continue
         for tag in exif_dict[ifd]:
-            if ifd != 'thumbnail':
+            if ifd != "thumbnail":
                 readable_dict[ifd][piexif.TAGS[ifd][tag]["name"]] = exif_dict[ifd][tag]
             else:
                 readable_dict[ifd][tag] = exif_dict[ifd][tag]
     return readable_dict
+
 
 def to_deg(value, is_longitude):
     # convert decimal coordinates into degrees, minutes and seconds tuple

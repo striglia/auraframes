@@ -5,7 +5,6 @@ from auraframes.models.asset import Asset, AssetPartialId
 
 
 class AssetApi(BaseApi):
-
     def batch_update(self, asset: Asset) -> tuple[list[str], list[AssetPartialId]]:
         """
         Posts new metadata to the API. This does not appear to affect the frame; however subsequent calls to retrieve
@@ -16,29 +15,35 @@ class AssetApi(BaseApi):
         :param asset: Asset containing new metadata
         :return: List of sent remote ids, list of received AssetPartialId successes
         """
-        json_response = self._client.put(f'/assets/batch_update.json', data={
-            "assets": [
-                asset.dict(
-                    include={
-                        'data_uti': True,
-                        'favorite': True,
-                        'file_name': True,
-                        'height': True,
-                        'local_identifier': True,
-                        'location': True,
-                        'md5_hash': True,
-                        'modified_at': True,
-                        'orientation': True,
-                        'selected': True,
-                        'taken_at': True,
-                        'upload_priority': True,
-                        'width': True
-                    })
-            ]
-        })
+        json_response = self._client.put(
+            "/assets/batch_update.json",
+            data={
+                "assets": [
+                    asset.dict(
+                        include={
+                            "data_uti": True,
+                            "favorite": True,
+                            "file_name": True,
+                            "height": True,
+                            "local_identifier": True,
+                            "location": True,
+                            "md5_hash": True,
+                            "modified_at": True,
+                            "orientation": True,
+                            "selected": True,
+                            "taken_at": True,
+                            "upload_priority": True,
+                            "width": True,
+                        }
+                    )
+                ]
+            },
+        )
 
-        return json_response.get('ids'), [AssetPartialId(**partial_asset_id) for partial_asset_id in
-                                          json_response.get('successes')]
+        return json_response.get("ids"), [
+            AssetPartialId(**partial_asset_id)
+            for partial_asset_id in json_response.get("successes")
+        ]
 
     def get_asset_by_local_identifier(self, local_id: str):
         """
@@ -46,10 +51,16 @@ class AssetApi(BaseApi):
         :param local_id: A local id string.
         :return: The retrieved asset, related child albums, and any smart adds related to the asset.
         """
-        json_response = self._client.get(f'/assets/asset_for_local_identifier.json',
-                                         query_params={'local_identifier': local_id})
+        json_response = self._client.get(
+            "/assets/asset_for_local_identifier.json",
+            query_params={"local_identifier": local_id},
+        )
 
-        return Asset(**json_response.get('asset')), json_response.get('child_albums'), json_response.get('smart_adds')
+        return (
+            Asset(**json_response.get("asset")),
+            json_response.get("child_albums"),
+            json_response.get("smart_adds"),
+        )
 
     def update_taken_at_date(self, asset: Asset) -> Asset:
         """
@@ -59,16 +70,23 @@ class AssetApi(BaseApi):
         :return: The asset with modified dates
         """
         request = {
-            'taken_at': asset.taken_at,
-            'taken_at_granularity': asset.taken_at_granularity
+            "taken_at": asset.taken_at,
+            "taken_at_granularity": asset.taken_at_granularity,
         }
 
         if asset.is_local_asset:
-            request.update({'local_identifier': asset.local_identifier, 'source_id': asset.source_id})
+            request.update(
+                {
+                    "local_identifier": asset.local_identifier,
+                    "source_id": asset.source_id,
+                }
+            )
         else:
-            request.update({'id': asset.id})
+            request.update({"id": asset.id})
 
-        json_response = self._client.post(f'/assets/update_taken_at_date.json', data=request)
+        json_response = self._client.post(
+            "/assets/update_taken_at_date.json", data=request
+        )
         return Asset(**json_response)
 
     def delete_asset(self, asset: Asset):
@@ -80,10 +98,12 @@ class AssetApi(BaseApi):
         :return: TODO
         """
         if asset.is_local_asset:
-            json_response = self._client.post(f'/assets/destroy_by_local_identifier.json',
-                                              data={'local_identifier': asset.local_identifier})
+            json_response = self._client.post(
+                "/assets/destroy_by_local_identifier.json",
+                data={"local_identifier": asset.local_identifier},
+            )
         else:
-            json_response = self._client.delete(f'/assets/{asset.id}.json')
+            json_response = self._client.delete(f"/assets/{asset.id}.json")
 
         return json_response
 
@@ -94,16 +114,20 @@ class AssetApi(BaseApi):
         :param asset: Asset containing new rotation/rect data.
         :return: The asset with modified crop fields.
         """
-        json_response = self._client.post(f'/assets/crop.json', data=asset.dict(
-            include={
-                'id': True,
-                'local_identifier': True,
-                'user_id': True,
-                'rotation_cw': True,
-                'user_landscape_16_10_rect': True,
-                'user_landscape_rect': True,
-                'user_portrait_4_5_rect': True,
-                'user_portrait_rect': True
-            }))
+        json_response = self._client.post(
+            "/assets/crop.json",
+            data=asset.dict(
+                include={
+                    "id": True,
+                    "local_identifier": True,
+                    "user_id": True,
+                    "rotation_cw": True,
+                    "user_landscape_16_10_rect": True,
+                    "user_landscape_rect": True,
+                    "user_portrait_4_5_rect": True,
+                    "user_portrait_rect": True,
+                }
+            ),
+        )
 
-        return Asset(**json_response.get('asset'))
+        return Asset(**json_response.get("asset"))
