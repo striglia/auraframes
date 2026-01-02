@@ -1,6 +1,6 @@
 from datetime import datetime
 
-AURA_DT_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+AURA_DT_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 def parse_aura_dt(aura_dt_str: str):

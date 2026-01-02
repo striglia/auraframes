@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
@@ -9,14 +7,14 @@ class User(BaseModel):
     updated_at: str
     name: str
     email: str
-    short_id: Optional[str]
+    short_id: str | None
     show_push_prompt: bool
-    latest_app_version: Optional[str]
-    attribution_id: Optional[str]
-    attribution_string: Optional[str]
-    test_account: Optional[bool]
-    avatar_file_name: Optional[str]
-    has_frame: Optional[bool]
+    latest_app_version: str | None
+    attribution_id: str | None
+    attribution_string: str | None
+    test_account: bool | None
+    avatar_file_name: str | None
+    has_frame: bool | None
     analytics_optout: bool = None
-    admin_account: Optional[bool] = False
+    admin_account: bool | None = False
     auth_token: str = None
