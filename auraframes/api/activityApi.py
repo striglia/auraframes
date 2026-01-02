@@ -1,3 +1,5 @@
+from typing import Any
+
 from auraframes.api.baseApi import BaseApi
 from auraframes.models.activity import Activity, Comment
 from auraframes.models.asset import Asset, AssetSetting
@@ -37,7 +39,7 @@ class ActivityApi(BaseApi):
             **json_response.get("comment")
         )
 
-    def remove_comment(self, activity_id: str, comment_id: str):
+    def remove_comment(self, activity_id: str, comment_id: str) -> Activity:
         """
         Removes a comment from an activity.
         :param activity_id: Activity id
@@ -52,8 +54,8 @@ class ActivityApi(BaseApi):
         return Activity(**json_response.get("activity"))
 
     def get_activity_assets(
-        self, activity_id: str, limit: int = 1000, cursor: str = None
-    ):
+        self, activity_id: str, limit: int = 1000, cursor: str | None = None
+    ) -> tuple[list[Asset], list[AssetSetting]]:
         """
         Gets assets associated to an activity. The results are paginated with `limit` results per page. To obtain the next set
         of pages, pass in the cursor from the response.
@@ -77,7 +79,9 @@ class ActivityApi(BaseApi):
             ],
         )
 
-    def post_activity(self, activity_id: str, frame_id: str, data: dict):
+    def post_activity(
+        self, activity_id: str, frame_id: str, data: dict[str, Any]
+    ) -> Any:
         """
         TODO: Unknown
         :param activity_id:

@@ -1,5 +1,6 @@
 import json
 import os
+from collections.abc import Sequence
 
 from pydantic import BaseModel
 from pydantic.json import pydantic_encoder
@@ -12,6 +13,6 @@ def build_path(*args: str, make_dir: bool = True) -> str:
     return path
 
 
-def write_model(model: BaseModel | list[BaseModel], path: str) -> None:
+def write_model(model: BaseModel | Sequence[BaseModel], path: str) -> None:
     with open(path, "w") as out:
         json.dump(model, out, default=pydantic_encoder)

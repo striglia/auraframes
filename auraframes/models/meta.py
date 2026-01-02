@@ -1,8 +1,16 @@
+from typing import Any, cast
+
 import pydantic
 
 
 class AllOptional(pydantic.main.ModelMetaclass):
-    def __new__(self, name, bases, namespaces, **kwargs):
+    def __new__(
+        cls,
+        name: str,
+        bases: tuple[type, ...],
+        namespaces: dict[str, Any],
+        **kwargs: Any,
+    ) -> type:
         annotations = namespaces.get("__annotations__", {})
         for base in bases:
             annotations.update(base.__annotations__)
@@ -10,4 +18,4 @@ class AllOptional(pydantic.main.ModelMetaclass):
             if not field.startswith("__"):
                 annotations[field] = annotations[field] | None
         namespaces["__annotations__"] = annotations
-        return super().__new__(self, name, bases, namespaces, **kwargs)
+        return cast(type, super().__new__(cls, name, bases, namespaces, **kwargs))

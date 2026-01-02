@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 from auraframes.api.baseApi import BaseApi
 from auraframes.models.activity import Activity
@@ -28,8 +29,8 @@ class FrameApi(BaseApi):
         )
 
     def get_assets(
-        self, frame_id: str, limit: int = 1000, cursor: str = None
-    ) -> tuple[list[Asset], str]:
+        self, frame_id: str, limit: int = 1000, cursor: str | None = None
+    ) -> tuple[list[Asset], str | None]:
         """
         Gets assets for a `frame_id`. The results are paginated with `limit` results per page. To obtain the next set
         of pages, pass in the cursor from the response.
@@ -49,7 +50,9 @@ class FrameApi(BaseApi):
         assets = [Asset(**asset_data) for asset_data in json_response.get("assets")]
         return assets, json_response.get("next_page_cursor")
 
-    def get_activities(self, frame_id: str, cursor: str = None):
+    def get_activities(
+        self, frame_id: str, cursor: str | None = None
+    ) -> tuple[list[Activity], str | None]:
         """
         Gets activities associated to a frame. This appears to be paginated, although
         :param frame_id: Frame id to retrieve associated activities
@@ -83,14 +86,15 @@ class FrameApi(BaseApi):
                 if goto_time
                 else format_dt_to_aura(get_utc_now()),
                 "swipe_direction": 0,
-                "impression_id": uuid.uuid4(),
+                "impression_id": str(uuid.uuid4()),
                 "select_asset": True,
             },
         )
 
-        return json_response.get("showing")
+        result: bool = json_response.get("showing")
+        return result
 
-    def update_frame(self, frame_id: str, frame_partial: FramePartial):
+    def update_frame(self, frame_id: str, frame_partial: FramePartial) -> Frame:
         """
         Updates a frame by id. This cannot update the frame id.
             TODO: Should we assume that FramePartial has `id` set and use that instead of `frame_id`?
@@ -120,7 +124,8 @@ class FrameApi(BaseApi):
             data={"assets": [asset_partial_id.to_request_format()]},
         )
 
-        return json_response.get("number_failed")
+        result: int = json_response.get("number_failed")
+        return result
 
     def exclude_asset(self, frame_id: str, asset_partial_id: AssetPartialId) -> int:
         """
@@ -137,7 +142,8 @@ class FrameApi(BaseApi):
             data={"assets": [asset_partial_id.to_request_format()]},
         )
 
-        return json_response.get("number_failed")
+        result: int = json_response.get("number_failed")
+        return result
 
     def remove_asset(self, frame_id: str, asset_partial_id: AssetPartialId) -> int:
         """
@@ -154,17 +160,18 @@ class FrameApi(BaseApi):
             data={"assets": [asset_partial_id.to_request_format()]},
         )
 
-        return json_response.get("number_failed")
+        result: int = json_response.get("number_failed")
+        return result
 
-    def reconfigure(self, frame_id: str):
+    def reconfigure(self, frame_id: str) -> Any:
         """
         TODO: Unknown
         :param frame_id:
         :return:
         """
-        return self._client.post(f"/frames/{frame_id}/reconfigure.json", data=None)
+        return self._client.post(f"/frames/{frame_id}/reconfigure.json", data={})
 
-    def add_playlist(self, frame_id: str, playlist_params: any):
+    def add_playlist(self, frame_id: str, playlist_params: Any) -> Any:
         # TODO: Implement
         json_response = self._client.post(
             f"/frames/{frame_id}/add_playlist.json", data={}
@@ -172,7 +179,7 @@ class FrameApi(BaseApi):
 
         return json_response
 
-    def remove_playlist(self, frame_id: str, playlist_params: any):
+    def remove_playlist(self, frame_id: str, playlist_params: Any) -> Any:
         # TODO: Implement
         json_response = self._client.post(
             f"/frames/{frame_id}/remove_playlist.json", data={}

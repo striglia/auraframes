@@ -1,4 +1,5 @@
 from collections import deque
+from typing import Any
 
 import httpx
 from httpx import Response, Timeout
@@ -34,7 +35,12 @@ class Client:
 
         self.history: deque[Response] = deque(maxlen=history_len)
 
-    def get(self, url, query_params: dict | None = None, headers: dict | None = None):
+    def get(
+        self,
+        url: str,
+        query_params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> Any:
         query_params = (
             {k: v for k, v in query_params.items() if v is not None}
             if query_params
@@ -52,11 +58,11 @@ class Client:
 
     def post(
         self,
-        url,
-        data: dict = None,
-        query_params: dict | None = None,
-        headers: dict | None = None,
-    ):
+        url: str,
+        data: dict[str, Any] | None = None,
+        query_params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> Any:
         logger.info(
             f"POST request to {url}",
             data=data,
@@ -75,8 +81,11 @@ class Client:
         return response.json()
 
     def delete(
-        self, url, query_params: dict | None = None, headers: dict | None = None
-    ):
+        self,
+        url: str,
+        query_params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> Any:
         logger.info(
             f"DELETE request to {url}", query_params=query_params, headers=headers
         )
@@ -93,11 +102,11 @@ class Client:
 
     def put(
         self,
-        url,
-        data: dict = None,
-        query_params: dict | None = None,
-        headers: dict | None = None,
-    ):
+        url: str,
+        data: dict[str, Any] | None = None,
+        query_params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> Any:
         logger.info(
             f"PUT request to {url}",
             data=data,
@@ -115,7 +124,7 @@ class Client:
 
         return response.json()
 
-    def add_default_headers(self, headers: dict) -> None:
+    def add_default_headers(self, headers: dict[str, str]) -> None:
         self.http2_client.headers.update(headers)
 
     def _set_cookies(self, response: httpx.Response) -> None:

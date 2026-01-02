@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, validator
@@ -104,11 +105,11 @@ class Asset(BaseModel):
     width: int
 
     @property
-    def taken_at_dt(self):
+    def taken_at_dt(self) -> datetime:
         return parse_aura_dt(self.taken_at)
 
     @property
-    def is_local_asset(self):
+    def is_local_asset(self) -> bool:
         return self.id is None
 
 
@@ -118,12 +119,14 @@ class AssetPartialId(BaseModel):
     user_id: str | None = None
 
     @validator("id")
-    def check_id_or_local_id(cls, _id, values):
+    def check_id_or_local_id(
+        cls, _id: str | None, values: dict[str, Any]
+    ) -> str | None:
         if not values.get("local_identifier") and not _id:
             raise ValueError("Either id or local_identifier is required")
         return _id
 
-    def to_request_format(self):
+    def to_request_format(self) -> dict[str, str | None]:
         # 'user_id': user_id # in the iphone version user_id is not passed in
         if self.id:
             return {"asset_id": self.id}

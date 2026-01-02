@@ -1,3 +1,5 @@
+from typing import Any
+
 from auraframes.api.baseApi import BaseApi
 
 # TODO: Untested
@@ -45,7 +47,7 @@ class AssetApi(BaseApi):
             for partial_asset_id in json_response.get("successes")
         ]
 
-    def get_asset_by_local_identifier(self, local_id: str):
+    def get_asset_by_local_identifier(self, local_id: str) -> tuple[Asset, Any, Any]:
         """
         Retrieves an asset given a local id.
         :param local_id: A local id string.
@@ -89,7 +91,7 @@ class AssetApi(BaseApi):
         )
         return Asset(**json_response)
 
-    def delete_asset(self, asset: Asset):
+    def delete_asset(self, asset: Asset) -> Any:
         """
         Deletes the asset. **Currently unknown if this is used, most deletions occur by removing
         the activity; maybe this deletes it from S3/Glacier** see :func:`FrameApi.remove_asset`

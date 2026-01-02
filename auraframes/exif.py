@@ -1,5 +1,6 @@
 import io
 from fractions import Fraction
+from typing import Any
 
 import piexif
 import piexif.helper
@@ -8,11 +9,16 @@ from loguru import logger
 
 from auraframes.models.asset import Asset
 
+# Type alias for DMS tuple: (degrees, minutes, seconds, direction)
+DmsTuple = tuple[tuple[int, int], tuple[int, int], tuple[int, int], str]
+LocationDms = tuple[DmsTuple, DmsTuple]
+
+
 # Most of the exif writing is from:
 # https://gitlab.com/searchwing/development/payloads/ros-generic/-/blob/master/searchwing_common_py/scripts/ImageSaverNode.py
 
 
-def build_gps_ifd(location_dms: tuple[any, any]):
+def build_gps_ifd(location_dms: LocationDms | None) -> dict[int, Any]:
     if not location_dms:
         return {}
 
@@ -30,10 +36,10 @@ def build_gps_ifd(location_dms: tuple[any, any]):
 
 class ExifWriter:
     geolocator = Nominatim(user_agent="Upload Scripting Test")
-    cache = {}
+    cache: dict[str, LocationDms] = {}
 
     # TODO: LRU Cache would be nice but probably over-engineered
-    def _lookup_gps(self, location_name: str):
+    def _lookup_gps(self, location_name: str) -> LocationDms | None:
         location_dms = self.cache.get(location_name)
         if location_dms:
             return location_dms
@@ -57,10 +63,16 @@ class ExifWriter:
         self.cache[location_name] = (longitude_dms, latitude_dms)
         return longitude_dms, latitude_dms
 
-    def write_exif(self, image, asset: Asset, thumbnail=None, set_gps_ifd=True):
+    def write_exif(
+        self,
+        image: bytes,
+        asset: Asset,
+        thumbnail: bytes | None = None,
+        set_gps_ifd: bool = True,
+    ) -> io.BytesIO:
         taken_datetime = asset.taken_at_dt.strftime("%Y:%m:%d %H:%M:%S").encode()
 
-        exif_dict = {
+        exif_dict: dict[str, Any] = {
             "Exif": {
                 piexif.ExifIFD.DateTimeOriginal: taken_datetime,
                 piexif.ExifIFD.DateTimeDigitized: taken_datetime,
@@ -73,7 +85,7 @@ class ExifWriter:
             },
         }
 
-        if set_gps_ifd:
+        if set_gps_ifd and asset.location_name:
             location_dms = self._lookup_gps(asset.location_name)
             exif_dict["GPS"] = build_gps_ifd(location_dms)
 
@@ -95,12 +107,12 @@ class ExifWriter:
         return new_imag
 
 
-def change_to_rational(number):
+def change_to_rational(number: int | float) -> tuple[int, int]:
     f = Fraction(str(number))
     return f.numerator, f.denominator
 
 
-def convert_to_rational_dms(dms: tuple[int, int, float, str]):
+def convert_to_rational_dms(dms: tuple[int, int, float, str]) -> DmsTuple:
     return (
         change_to_rational(dms[0]),
         change_to_rational(dms[1]),
@@ -109,13 +121,13 @@ def convert_to_rational_dms(dms: tuple[int, int, float, str]):
     )
 
 
-def clone_exif(original_path, clone_path):
+def clone_exif(original_path: str, clone_path: str) -> None:
     piexif.transplant(original_path, clone_path)
 
 
-def get_readable_exif(image_path):
+def get_readable_exif(image_path: str) -> dict[str, dict[str, Any]]:
     exif_dict = piexif.load(image_path)
-    readable_dict = {}
+    readable_dict: dict[str, dict[str, Any]] = {}
     for ifd in exif_dict:
         readable_dict[ifd] = {}
         if not exif_dict[ifd]:
@@ -128,7 +140,7 @@ def get_readable_exif(image_path):
     return readable_dict
 
 
-def to_deg(value, is_longitude):
+def to_deg(value: float, is_longitude: bool) -> tuple[int, int, float, str]:
     # convert decimal coordinates into degrees, minutes and seconds tuple
     # Keyword arguments:
     #   value is float gps-value,
