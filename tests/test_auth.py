@@ -1,5 +1,7 @@
 """Tests for authentication flow."""
 
+from typing import Any
+
 from pytest_httpx import HTTPXMock
 
 from auraframes.api.accountApi import AccountApi
@@ -11,7 +13,7 @@ class TestLogin:
     """Tests for the login flow."""
 
     def test_login_sets_auth_headers(
-        self, httpx_mock: HTTPXMock, mock_user: dict
+        self, httpx_mock: HTTPXMock, mock_user: dict[str, Any]
     ) -> None:
         """Successful login should set x-token-auth and x-user-id headers."""
         # Arrange
@@ -34,7 +36,7 @@ class TestLogin:
         assert aura._client.http2_client.headers.get("x-user-id") == mock_user["id"]
 
     def test_login_returns_aura_instance(
-        self, httpx_mock: HTTPXMock, mock_user: dict
+        self, httpx_mock: HTTPXMock, mock_user: dict[str, Any]
     ) -> None:
         """Login should return self for method chaining."""
         httpx_mock.add_response(
@@ -53,7 +55,7 @@ class TestAccountApi:
     """Tests for AccountApi methods."""
 
     def test_login_parses_user_response(
-        self, httpx_mock: HTTPXMock, mock_user: dict
+        self, httpx_mock: HTTPXMock, mock_user: dict[str, Any]
     ) -> None:
         """Login should parse API response into User model."""
         httpx_mock.add_response(
@@ -72,7 +74,7 @@ class TestAccountApi:
         assert user.auth_token == mock_user["auth_token"]
 
     def test_login_sends_correct_payload(
-        self, httpx_mock: HTTPXMock, mock_user: dict
+        self, httpx_mock: HTTPXMock, mock_user: dict[str, Any]
     ) -> None:
         """Login should send email, password, and device identifiers."""
         httpx_mock.add_response(

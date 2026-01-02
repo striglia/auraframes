@@ -1,12 +1,14 @@
 """Shared test fixtures for auraframes tests."""
 
+from typing import Any
+
 import pytest
 
 from auraframes.client import Client
 
 
 @pytest.fixture
-def mock_user() -> dict:
+def mock_user() -> dict[str, Any]:
     """Sample user response from login API."""
     return {
         "id": "user-123",
@@ -29,7 +31,7 @@ def mock_user() -> dict:
 
 
 @pytest.fixture
-def mock_frame() -> dict:
+def mock_frame() -> dict[str, Any]:
     """Sample frame response from API."""
     return {
         "id": "frame-456",
