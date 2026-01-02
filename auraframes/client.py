@@ -1,5 +1,4 @@
 from collections import deque
-from typing import Any
 
 import httpx
 from httpx import Response, Timeout
@@ -20,7 +19,7 @@ USER_AGENT = "Aura/4.7.790 (Android 30; Client)"
 
 
 class Client:
-    def __init__(self, history_len: int = 30) -> None:
+    def __init__(self, history_len: int = 30):
         self.http2_client = httpx.Client(
             http2=True,
             base_url=f"{AURA_API_BASE_URL}/{AURA_API_VERSION}",
@@ -35,12 +34,7 @@ class Client:
 
         self.history: deque[Response] = deque(maxlen=history_len)
 
-    def get(
-        self,
-        url: str,
-        query_params: dict[str, Any] | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> Any:
+    def get(self, url, query_params: dict | None = None, headers: dict | None = None):
         query_params = (
             {k: v for k, v in query_params.items() if v is not None}
             if query_params
@@ -58,11 +52,11 @@ class Client:
 
     def post(
         self,
-        url: str,
-        data: dict[str, Any] | None = None,
-        query_params: dict[str, Any] | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> Any:
+        url,
+        data: dict = None,
+        query_params: dict | None = None,
+        headers: dict | None = None,
+    ):
         logger.info(
             f"POST request to {url}",
             data=data,
@@ -81,11 +75,8 @@ class Client:
         return response.json()
 
     def delete(
-        self,
-        url: str,
-        query_params: dict[str, Any] | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> Any:
+        self, url, query_params: dict | None = None, headers: dict | None = None
+    ):
         logger.info(
             f"DELETE request to {url}", query_params=query_params, headers=headers
         )
@@ -102,11 +93,11 @@ class Client:
 
     def put(
         self,
-        url: str,
-        data: dict[str, Any] | None = None,
-        query_params: dict[str, Any] | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> Any:
+        url,
+        data: dict = None,
+        query_params: dict | None = None,
+        headers: dict | None = None,
+    ):
         logger.info(
             f"PUT request to {url}",
             data=data,
@@ -124,7 +115,7 @@ class Client:
 
         return response.json()
 
-    def add_default_headers(self, headers: dict[str, str]) -> None:
+    def add_default_headers(self, headers: dict) -> None:
         self.http2_client.headers.update(headers)
 
     def _set_cookies(self, response: httpx.Response) -> None:

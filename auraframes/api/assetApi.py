@@ -1,5 +1,3 @@
-from typing import Any
-
 from auraframes.api.baseApi import BaseApi
 
 # TODO: Untested
@@ -9,7 +7,8 @@ from auraframes.models.asset import Asset, AssetPartialId
 class AssetApi(BaseApi):
     def batch_update(self, asset: Asset) -> tuple[list[str], list[AssetPartialId]]:
         """
-        Posts new metadata to the API.
+        Posts new metadata to the API. This does not appear to affect the frame; however subsequent calls to retrieve
+        this asset will have the modified metadata.
 
         Primarily used to to update an asset after the image has been uploaded to S3.
 
@@ -46,9 +45,7 @@ class AssetApi(BaseApi):
             for partial_asset_id in json_response.get("successes")
         ]
 
-    def get_asset_by_local_identifier(
-        self, local_id: str
-    ) -> tuple[Asset, list[Any], list[Any]]:
+    def get_asset_by_local_identifier(self, local_id: str):
         """
         Retrieves an asset given a local id.
         :param local_id: A local id string.
@@ -67,11 +64,12 @@ class AssetApi(BaseApi):
 
     def update_taken_at_date(self, asset: Asset) -> Asset:
         """
-        Updates an asset's taken_date and taken_at_granularity.
+        Updates an asset's taken_date and taken_at_granularity. This will modify the date displayed in the frame and
+        from future responses.
         :param asset: Asset with new taken_at or taken_at_granularity
         :return: The asset with modified dates
         """
-        request: dict[str, Any] = {
+        request = {
             "taken_at": asset.taken_at,
             "taken_at_granularity": asset.taken_at_granularity,
         }
@@ -91,9 +89,10 @@ class AssetApi(BaseApi):
         )
         return Asset(**json_response)
 
-    def delete_asset(self, asset: Asset) -> Any:
+    def delete_asset(self, asset: Asset):
         """
-        Deletes the asset.
+        Deletes the asset. **Currently unknown if this is used, most deletions occur by removing
+        the activity; maybe this deletes it from S3/Glacier** see :func:`FrameApi.remove_asset`
 
         :param asset: Asset for removal
         :return: TODO

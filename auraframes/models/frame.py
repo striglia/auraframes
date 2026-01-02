@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Any
 
 from pydantic import BaseModel
 
@@ -23,69 +22,69 @@ class Frame(BaseModel):
     created_at: str
     updated_at: str
     handled_at: str
-    deleted_at: str | None = None
-    updated_at_on_client: str | None = None
+    deleted_at: str | None
+    updated_at_on_client: str | None
     orientation: int
     auto_brightness: bool
     min_brightness: int
     max_brightness: int
-    brightness: int | None = None
+    brightness: int | None
     sense_motion: bool
-    default_speed: str | None = None
+    default_speed: str | None
     slideshow_interval: int
     slideshow_auto: bool
     digits: int
-    contributors: list[User] | None = None
-    contributor_tokens: list[dict[str, Any]]
+    contributors: list[User] | None
+    contributor_tokens: list[dict]
     hw_serial: str
     matting_color: str
     trim_color: str
     is_handling: bool
     calibrations_last_modified_at: str
     gestures_on: bool
-    portrait_pairing_off: bool | None = None
+    portrait_pairing_off: bool | None
     live_photos_on: bool
-    auto_processed_playlist_ids: list[Any]  # unknown
+    auto_processed_playlist_ids: list[object]  # unknown
     time_zone: str
     wifi_network: str
-    cold_boot_at: str | None = None
+    cold_boot_at: str | None
     is_charity_water_frame: bool
     num_assets: int
     thanks_on: bool
-    frame_queue_url: str | None = None
+    frame_queue_url: str | None
     client_queue_url: str
     scheduled_display_sleep: bool
-    scheduled_display_on_at: str | None = None
-    scheduled_display_off_at: str | None = None
-    forced_wifi_state: str | None = None
-    forced_wifi_recipient_email: str | None = None
+    scheduled_display_on_at: str | None
+    scheduled_display_off_at: str | None
+    forced_wifi_state: str | None
+    forced_wifi_recipient_email: str | None
     is_analog_frame: bool
     control_type: str
     display_aspect_ratio: str
-    has_claimable_gift: bool | None = None
-    gift_billing_hint: str | None = None
+    has_claimable_gift: bool | None
+    gift_billing_hint: str | None
     locale: str
-    frame_type: int | None = None
-    description: str | None = None
-    representative_asset_id: str | None = None
-    sort_mode: str | None = None
+    frame_type: int | None
+    description: str | None
+    representative_asset_id: str | None
+    sort_mode: str | None
     email_address: str
-    features: list[Feature] | None = None
-    letterbox_style: str | None = None
+    features: list[Feature] | None
+    letterbox_style: str | None
     user: User
-    playlists: list[dict[str, Any]]  # TODO
-    delivered_frame_gift: dict[str, Any] | None = None  # TODO
-    last_feed_item: dict[str, Any]
-    last_impression: dict[str, Any] | None = None
+    playlists: list[dict]  # TODO
+    delivered_frame_gift: dict | None  # TODO
+    last_feed_item: dict
+    last_impression: dict | None
     last_impression_at: str
-    child_albums: list[Any]
-    smart_adds: list[Any]
-    recent_assets: list[Any]
+    child_albums: list
+    smart_adds: list
+    recent_assets: list
 
-    def is_portrait(self) -> bool:
+    def is_portrait(self):
         return self.orientation == 2 or self.orientation == 3
 
-    def get_frame_type(self) -> int | str:
+    def get_frame_type(self):
         return self.frame_type if self.frame_type else "normal"
 
 
