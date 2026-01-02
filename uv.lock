@@ -48,7 +48,12 @@ dev = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "moto" },
     { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-httpx" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -76,7 +81,14 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "mypy", specifier = ">=1.19.1" }]
+dev = [
+    { name = "moto", specifier = ">=5.1.19" },
+    { name = "mypy", specifier = ">=1.19.1" },
+    { name = "pre-commit", specifier = ">=4.5.1" },
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-httpx", specifier = ">=0.36.0" },
+    { name = "ruff", specifier = ">=0.14.10" },
+]
 
 [[package]]
 name = "boto3"

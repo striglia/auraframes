@@ -8,16 +8,17 @@ SESSION_CONFIG = botocore.config.Config(
 
 # TODO: Convert this to use os.environ vars?
 class AWSClient:
-
-    def __init__(self, pool_id: str, region_name='us-east-1'):
+    def __init__(self, pool_id: str, region_name="us-east-1"):
         # boto3.set_stream_logger('', logging.DEBUG)
 
         self.region_name = region_name
-        self.cognito = boto3.client('cognito-identity', region_name=self.region_name)
+        self.cognito = boto3.client("cognito-identity", region_name=self.region_name)
         if pool_id:
             self.auth(pool_id)
 
     def auth(self, pool_id):
         ident_resp = self.cognito.get_id(IdentityPoolId=pool_id)
-        cred_resp = self.cognito.get_credentials_for_identity(IdentityId=ident_resp['IdentityId'])
-        self.credentials = cred_resp['Credentials']
+        cred_resp = self.cognito.get_credentials_for_identity(
+            IdentityId=ident_resp["IdentityId"]
+        )
+        self.credentials = cred_resp["Credentials"]
