@@ -91,3 +91,59 @@ class TestAccountApi:
         request = httpx_mock.get_request()
         assert request is not None
         assert request.method == "POST"
+
+    def test_register_creates_new_user(
+        self, httpx_mock: HTTPXMock, mock_user: dict[str, Any]
+    ) -> None:
+        """Register should create a new user account."""
+        httpx_mock.add_response(
+            url="https://api.pushd.com/v5/account/register.json",
+            method="POST",
+            json={"result": {"current_user": mock_user}},
+        )
+
+        client = Client()
+        api = AccountApi(client)
+
+        user = api.register("new@example.com", "password123", "New User")
+
+        assert user.id == mock_user["id"]
+        assert user.email == mock_user["email"]
+
+        request = httpx_mock.get_request()
+        assert request is not None
+        assert request.method == "POST"
+
+    def test_delete_removes_user(self, httpx_mock: HTTPXMock) -> None:
+        """Delete should remove the current user account."""
+        httpx_mock.add_response(
+            url="https://api.pushd.com/v5/account/delete",
+            method="DELETE",
+            json={"result": {"success": True}},
+        )
+
+        client = Client()
+        api = AccountApi(client)
+
+        result = api.delete()
+
+        assert result is True
+
+        request = httpx_mock.get_request()
+        assert request is not None
+        assert request.method == "DELETE"
+
+    def test_delete_returns_false_on_error(self, httpx_mock: HTTPXMock) -> None:
+        """Delete should return False when deletion fails."""
+        httpx_mock.add_response(
+            url="https://api.pushd.com/v5/account/delete",
+            method="DELETE",
+            json={"result": {"success": False}, "error": "Failed to delete"},
+        )
+
+        client = Client()
+        api = AccountApi(client)
+
+        result = api.delete()
+
+        assert result is False
