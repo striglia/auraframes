@@ -75,7 +75,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --cov=auraframes --cov-fail-under=75"
 
 [build-system]
 requires = ["hatchling"]
