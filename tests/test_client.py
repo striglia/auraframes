@@ -51,6 +51,7 @@ class TestRedactSensitive:
         }
         result = _redact_sensitive(data)
 
+        assert result is not None
         assert result["level1"]["level2"]["password"] == "[REDACTED]"
         assert result["level1"]["level2"]["other"] == "value"
 
