@@ -19,6 +19,24 @@ USER_AGENT = "Aura/4.7.790 (Android 30; Client)"
 # TODO: This should be reworked to be async, particularly for mass uploads/clones.
 
 
+SENSITIVE_FIELDS = {"password"}
+
+
+def _redact_sensitive(data: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Recursively redact sensitive fields from data before logging."""
+    if data is None:
+        return None
+    result: dict[str, Any] = {}
+    for key, value in data.items():
+        if key in SENSITIVE_FIELDS:
+            result[key] = "[REDACTED]"
+        elif isinstance(value, dict):
+            result[key] = _redact_sensitive(value)
+        else:
+            result[key] = value
+    return result
+
+
 class Client:
     def __init__(self, history_len: int = 30):
         self.http2_client = httpx.Client(
@@ -65,7 +83,7 @@ class Client:
     ) -> Any:
         logger.info(
             f"POST request to {url}",
-            data=data,
+            data=_redact_sensitive(data),
             query_params=query_params,
             headers=headers,
         )
@@ -109,7 +127,7 @@ class Client:
     ) -> Any:
         logger.info(
             f"PUT request to {url}",
-            data=data,
+            data=_redact_sensitive(data),
             query_params=query_params,
             headers=headers,
         )
